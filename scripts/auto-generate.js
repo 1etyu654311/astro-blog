@@ -14,6 +14,9 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const BLOG_DIR = join(__dirname, '../src/content/blog');
 const ASSETS_DIR = join(__dirname, '../src/assets');
 
+// Also copy to learn-new-adea (main Cloudflare site)
+const LEARN_NEW_ADEA_DIR = join(__dirname, '../../learn-new-adea/src/content/blog');
+
 // Topics pool for auto-generation
 const TOPICS = [
     'التكنولوجيا الحديثة',
@@ -162,6 +165,28 @@ async function generateAndSave() {
         // Write file
         writeFileSync(filepath, fullContent, 'utf-8');
         console.log(`[AutoGen] ✅ Saved to: ${filepath}`);
+        
+        // Also copy to learn-new-adea (main site)
+        try {
+            if (!existsSync(LEARN_NEW_ADEA_DIR)) {
+                mkdirSync(LEARN_NEW_ADEA_DIR, { recursive: true });
+            }
+            const learnNewAdeaPath = join(LEARN_NEW_ADEA_DIR, filename);
+            writeFileSync(learnNewAdeaPath, fullContent, 'utf-8');
+            console.log(`[AutoGen] ✅ Copied to learn-new-adea: ${learnNewAdeaPath}`);
+            
+            // Commit and push to learn-new-adea
+            execSync('git add src/content/blog/', { cwd: join(__dirname, '../../learn-new-adea'), stdio: 'pipe' });
+            try {
+                execSync(`git commit -m "${commitMessage}"`, { cwd: join(__dirname, '../../learn-new-adea'), stdio: 'pipe' });
+                execSync('git push origin main', { cwd: join(__dirname, '../../learn-new-adea'), stdio: 'pipe' });
+                console.log('[AutoGen] ✅ Pushed to learn-new-adea repo');
+            } catch (e) {
+                console.log(`[AutoGen] ⚠️ learn-new-adea git: ${e.message}`);
+            }
+        } catch (e) {
+            console.log(`[AutoGen] ⚠️ Could not copy to learn-new-adea: ${e.message}`);
+        }
         
         // Git operations
         console.log('[AutoGen] Committing to Git...');
