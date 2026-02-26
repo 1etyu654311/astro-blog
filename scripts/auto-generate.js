@@ -184,22 +184,13 @@ async function generateAndSave() {
             console.log(`[AutoGen] ⚠️ Push failed: ${e.message}`);
         }
         
-        // Build and deploy to Cloudflare Pages
-        console.log('[AutoGen] ☁️ Building for Cloudflare...');
+        // Build the site (GitHub Actions will handle deployment to Cloudflare)
+        console.log('[AutoGen] ☁️ Building site...');
         try {
-            // Build the site
             execSync('npm run build', { cwd: join(__dirname, '..'), stdio: 'pipe' });
-            console.log('[AutoGen] ✅ Build successful');
-            
-            // Deploy to Cloudflare using wrangler
-            console.log('[AutoGen] ☁️ Deploying to Cloudflare Pages...');
-            execSync('wrangler pages deploy dist --project-name=zapping-zero --branch=main --commit-dirty=true', { 
-                cwd: join(__dirname, '..'), 
-                stdio: 'pipe' 
-            });
-            console.log('[AutoGen] ✅ Deployed to Cloudflare Pages!');
+            console.log('[AutoGen] ✅ Build successful - GitHub Actions will deploy to Cloudflare');
         } catch (e) {
-            console.log(`[AutoGen] ⚠️ Cloudflare deploy failed: ${e.message}`);
+            console.log(`[AutoGen] ⚠️ Build failed: ${e.message}`);
         }
         
         return {
