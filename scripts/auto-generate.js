@@ -44,7 +44,7 @@ const TOPICS = [
     'Docker و Kubernetes',
     'Git و GitHub',
     'CI/CD DevOps',
-    '.testing البرمجي',
+    'testing البرمجي',
     'أداء التطبيقات',
     'SEO التقني',
     'Web3 و NFT',
@@ -170,25 +170,36 @@ async function generateAndSave() {
         execSync('git add src/content/blog/', { cwd: join(__dirname, '..'), stdio: 'pipe' });
         
         try {
-            execSync(`git commit -m "${commitMessage}"`, { 
-                cwd: join(__dirname, '..'), 
-                stdio: 'pipe' 
-            });
+            execSync(`git commit -m "${commitMessage}"`, { cwd: join(__dirname, '..'), stdio: 'pipe' });
             console.log(`[AutoGen] ✅ Committed: ${commitMessage}`);
         } catch (e) {
-            // No changes to commit
             console.log('[AutoGen] ℹ️ No changes to commit');
         }
         
         // Push to remote
         try {
-            execSync('git push origin main', { 
-                cwd: join(__dirname, '..'), 
-                stdio: 'pipe' 
-            });
+            execSync('git push origin main', { cwd: join(__dirname, '..'), stdio: 'pipe' });
             console.log('[AutoGen] ✅ Pushed to GitHub');
         } catch (e) {
             console.log(`[AutoGen] ⚠️ Push failed: ${e.message}`);
+        }
+        
+        // Build and deploy to Cloudflare Pages
+        console.log('[AutoGen] ☁️ Building for Cloudflare...');
+        try {
+            // Build the site
+            execSync('npm run build', { cwd: join(__dirname, '..'), stdio: 'pipe' });
+            console.log('[AutoGen] ✅ Build successful');
+            
+            // Deploy to Cloudflare using wrangler
+            console.log('[AutoGen] ☁️ Deploying to Cloudflare Pages...');
+            execSync('wrangler pages deploy dist --project-name=zapping-zero --branch=main --commit-dirty=true', { 
+                cwd: join(__dirname, '..'), 
+                stdio: 'pipe' 
+            });
+            console.log('[AutoGen] ✅ Deployed to Cloudflare Pages!');
+        } catch (e) {
+            console.log(`[AutoGen] ⚠️ Cloudflare deploy failed: ${e.message}`);
         }
         
         return {
